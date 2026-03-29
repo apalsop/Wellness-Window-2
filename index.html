@@ -6,9 +6,9 @@
     <title>Wellness Window</title>
     <style>
         :root { --accent: #00aaff; --bg: #050505; --card-bg: #111; }
-        body { background: var(--bg); color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        body { background: var(--bg); color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
         
-        /* SPLASH SCREEN */
+        /* OVERLAY / SPLASH */
         #splash {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 9999;
@@ -22,101 +22,129 @@
         #enter-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 30px var(--accent); }
 
         /* MAIN UI */
-        #main-ui { display: none; padding: 40px 20px; width: 100%; flex-direction: column; align-items: center; }
+        #main-ui { display: none; padding: 40px 20px; width: 100%; flex-direction: column; align-items: center; opacity: 0; transition: opacity 1s; }
         #status-bar { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; font-family: monospace; font-size: 0.8rem; color: var(--accent); letter-spacing: 2px; margin-bottom: 20px; opacity: 0.7; }
         
-        h1 { font-size: 4.5rem; font-weight: 900; text-transform: uppercase; letter-spacing: 15px; color: #fff; margin: 20px 0 40px 0; text-align: center; text-shadow: 0 0 20px rgba(0, 170, 255, 0.4); }
+        h1 { font-size: clamp(2rem, 8vw, 4.5rem); font-weight: 900; text-transform: uppercase; letter-spacing: clamp(5px, 2vw, 15px); color: #fff; margin: 20px 0 40px 0; text-align: center; text-shadow: 0 0 20px rgba(0, 170, 255, 0.4); }
         
         #mixer { 
             background: rgba(255, 255, 255, 0.03); border: 1px solid var(--accent); 
-            padding: 15px 40px; border-radius: 50px; display: flex; gap: 35px; 
+            padding: 15px 40px; border-radius: 50px; display: flex; flex-wrap: wrap; justify-content: center; gap: 35px; 
             margin-bottom: 50px; backdrop-filter: blur(10px);
         }
 
-        .btn { background: none; border: none; color: #555; cursor: pointer; font-size: 1rem; font-weight: bold; text-transform: uppercase; letter-spacing: 4px; transition: 0.3s; }
+        .btn { background: none; border: none; color: #555; cursor: pointer; font-size: 1rem; font-weight: bold; text-transform: uppercase; letter-spacing: 4px; transition: 0.3s; padding: 10px; }
         .btn:hover { color: #fff; }
         .btn.active { color: var(--accent); text-shadow: 0 0 15px var(--accent); }
 
-        .tagline { margin-top: auto; padding-bottom: 50px; font-family: monospace; color: var(--accent); letter-spacing: 10px; opacity: 0.6; font-size: 0.9rem; font-weight: bold; }
+        .tagline { margin-top: auto; padding: 50px 0; font-family: monospace; color: var(--accent); letter-spacing: 10px; opacity: 0.6; font-size: 0.9rem; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="splash">
         <h1 style="font-size: 2.5rem; margin-bottom: 50px;">WELLNESS WINDOW</h1>
-        <button id="enter-btn" onclick="startApp()">Enter</button>
+        <button id="enter-btn" onclick="initializeSystem()">Enter</button>
     </div>
 
     <div id="main-ui">
         <div id="status-bar">
             <span>SYSTEM: ONLINE</span>
             <span id="clock">00:00:00</span>
-            <span>STABLE_STREAM_V3.1</span>
+            <span>BUILD_3.2_STABLE</span>
         </div>
 
         <h1>WELLNESS WINDOW</h1>
 
         <div id="mixer">
-            <button class="btn" id="btn-rain" onclick="playAudio('rain')">Rain</button>
-            <button class="btn" id="btn-waves" onclick="playAudio('waves')">Waves</button>
-            <button class="btn" id="btn-forest" onclick="playAudio('forest')">Forest</button>
-            <button class="btn" id="btn-lofi" onclick="playAudio('lofi')">Lo-Fi</button>
-            <button class="btn" style="color:#ff4444; margin-left: 15px;" onclick="stopAll()">OFF</button>
+            <button class="btn" id="btn-rain" onclick="audioControl('rain')">Rain</button>
+            <button class="btn" id="btn-waves" onclick="audioControl('waves')">Waves</button>
+            <button class="btn" id="btn-forest" onclick="audioControl('forest')">Forest</button>
+            <button class="btn" id="btn-lofi" onclick="audioControl('lofi')">Lo-Fi</button>
+            <button class="btn" style="color:#ff4444;" onclick="stopEverything()">OFF</button>
         </div>
 
         <div class="tagline">ARK - AZ</div>
     </div>
 
-    <audio id="aud-rain" loop src="https://stream.zeno.fm/032u683f83duv"></audio>
-    <audio id="aud-waves" loop src="https://stream.zeno.fm/4v6v798n0zhvv"></audio>
-    <audio id="aud-forest" loop src="https://stream.zeno.fm/65k793ykwzuv"></audio>
-    <audio id="aud-lofi" loop src="https://stream.zeno.fm/0r0xa792kwzuv"></audio>
+    <audio id="aud-rain" loop preload="auto" src="https://stream.zeno.fm/032u683f83duv"></audio>
+    <audio id="aud-waves" loop preload="auto" src="https://stream.zeno.fm/4v6v798n0zhvv"></audio>
+    <audio id="aud-forest" loop preload="auto" src="https://stream.zeno.fm/65k793ykwzuv"></audio>
+    <audio id="aud-lofi" loop preload="auto" src="https://stream.zeno.fm/0r0xa792kwzuv"></audio>
 
     <script>
-        const sources = ['rain', 'waves', 'forest', 'lofi'];
-
-        function startApp() {
+        const audioIds = ['rain', 'waves', 'forest', 'lofi'];
+        
+        function initializeSystem() {
+            // UI Transition
             document.getElementById('splash').style.display = 'none';
-            document.getElementById('main-ui').style.display = 'flex';
-            
-            // Force browser to "trust" all 4 streams immediately on Enter
-            sources.forEach(id => {
-                const a = document.getElementById('aud-' + id);
-                a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(e => {});
+            const main = document.getElementById('main-ui');
+            main.style.display = 'flex';
+            setTimeout(() => main.style.opacity = '1', 10);
+
+            // The Critical Handshake: Force-load and "wake up" every stream
+            audioIds.forEach(id => {
+                const el = document.getElementById('aud-' + id);
+                el.load(); // Forces the browser to establish the connection
+                
+                // Silent play/pause to satisfy browser security
+                const playPromise = el.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        el.pause();
+                        el.currentTime = 0;
+                    }).catch(error => {
+                        console.log("Handshake pending for: " + id);
+                    });
+                }
             });
         }
 
-        async function playAudio(id) {
+        function audioControl(id) {
             const target = document.getElementById('aud-' + id);
-            const btn = document.getElementById('btn-' + id);
+            const button = document.getElementById('btn-' + id);
 
+            // If this one is already playing, stop it
             if (!target.paused) {
                 target.pause();
-                btn.classList.remove('active');
+                button.classList.remove('active');
                 return;
             }
 
-            stopAll();
+            // Otherwise, clear everything and start fresh
+            stopEverything();
 
-            try {
-                await target.play();
-                btn.classList.add('active');
-            } catch (err) {
-                console.error("Stream Blocked", err);
-            }
+            // Direct Play
+            target.play().then(() => {
+                button.classList.add('active');
+                // Update Browser Media Session if supported
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: 'Wellness Window',
+                        artist: id.toUpperCase(),
+                        album: 'ARK - AZ'
+                    });
+                }
+            }).catch(e => {
+                console.error("Playback failed. Please try clicking Enter again.");
+            });
         }
 
-        function stopAll() {
-            sources.forEach(id => {
-                const a = document.getElementById('aud-' + id);
-                const b = document.getElementById('btn-' + id);
-                if (a) a.pause();
-                if (b) b.classList.remove('active');
+        function stopEverything() {
+            audioIds.forEach(id => {
+                const el = document.getElementById('aud-' + id);
+                const btn = document.getElementById('btn-' + id);
+                el.pause();
+                // Reset stream connection to prevent lag
+                const oldSrc = el.src;
+                el.src = "";
+                el.src = oldSrc; 
+                btn.classList.remove('active');
             });
         }
 
         setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', { hour12: true });
         }, 1000);
     </script>
 </body>
