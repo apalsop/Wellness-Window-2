@@ -6,110 +6,117 @@
     <title>ARK-AZ // Perspective Window</title>
     <style>
         :root { --accent: #00aaff; --bg: #050505; --card-bg: #111; }
-        body { background: var(--bg); color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+        body { background: var(--bg); color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        #status-bar { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; font-family: monospace; font-size: 0.8rem; color: var(--accent); letter-spacing: 2px; margin-bottom: 20px; opacity: 0.8; }
-        h1 { font-size: 4rem; font-weight: 900; text-transform: uppercase; letter-spacing: 15px; color: #fff; margin: 20px 0 40px 0; text-align: center; text-shadow: 0 0 20px rgba(0, 170, 255, 0.5); }
+        /* THE SPLASH SCREEN - This solves the "Circles" */
+        #overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: 0.8s ease-out;
+        }
+        #start-btn {
+            padding: 20px 50px; background: none; border: 2px solid var(--accent);
+            color: var(--accent); font-size: 1.5rem; letter-spacing: 5px;
+            cursor: pointer; text-transform: uppercase; transition: 0.3s;
+            box-shadow: 0 0 20px rgba(0, 170, 255, 0.2);
+        }
+        #start-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 40px var(--accent); }
+
+        /* Main UI */
+        #content { opacity: 0; transition: 1.5s; padding: 40px 20px; width: 100%; display: flex; flex-direction: column; align-items: center; }
+        #status-bar { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; font-family: monospace; font-size: 0.8rem; color: var(--accent); letter-spacing: 2px; margin-bottom: 20px; }
+        h1 { font-size: 4rem; font-weight: 900; text-transform: uppercase; letter-spacing: 15px; color: #fff; margin: 20px 0 40px 0; text-align: center; }
         
         #mixer-panel { 
-            background: rgba(255, 255, 255, 0.03); 
-            border: 1px solid var(--accent); 
-            padding: 15px 40px; 
-            border-radius: 50px; 
-            display: flex; 
-            gap: 30px; 
-            margin-bottom: 30px; 
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--accent); 
+            padding: 15px 40px; border-radius: 50px; display: flex; gap: 30px; 
+            margin-bottom: 30px; backdrop-filter: blur(10px);
         }
-
         .mixer-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 0.9rem; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; transition: 0.4s; }
         .mixer-btn.active { color: var(--accent); text-shadow: 0 0 15px var(--accent); }
-        
-        #debug-log { font-family: monospace; font-size: 0.75rem; color: var(--accent); margin-bottom: 30px; border-bottom: 1px solid #222; padding-bottom: 5px; min-width: 300px; text-align: center; }
-
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; width: 100%; max-width: 1200px; }
-        .window-card { background: var(--card-bg); border: 1px solid #222; border-radius: 15px; height: 180px; display: flex; align-items: center; justify-content: center; opacity: 0.5; }
         .footer-sig { margin-top: 80px; font-family: monospace; color: var(--accent); letter-spacing: 8px; opacity: 0.4; font-size: 0.7rem; }
     </style>
 </head>
 <body>
 
-    <div id="status-bar">
-        <span>SYSTEM: ONLINE</span>
-        <span id="clock">00:00:00</span>
-        <span>ARK-AZ // BUILD 2.2</span>
+    <div id="overlay">
+        <h1 style="font-size: 2rem; margin-bottom: 40px;">ARK-AZ // PERSPECTIVE</h1>
+        <button id="start-btn" onclick="initWindow()">Enter Window</button>
+        <p style="margin-top: 20px; color: #444; font-family: monospace;">CLICKS REQUIRED TO UNLOCK MEDIA SESSIONS</p>
     </div>
 
-    <h1>WELLNESS WINDOW</h1>
+    <div id="content">
+        <div id="status-bar">
+            <span>SYSTEM: ONLINE</span>
+            <span id="clock">00:00:00</span>
+            <span>BUILD 3.0 // STABLE</span>
+        </div>
 
-    <div id="mixer-panel">
-        <button class="mixer-btn" id="btn-rain" onclick="playEngine('rain')">Rain</button>
-        <button class="mixer-btn" id="btn-waves" onclick="playEngine('waves')">Waves</button>
-        <button class="mixer-btn" id="btn-forest" onclick="playEngine('forest')">Forest</button>
-        <button class="mixer-btn" id="btn-lofi" onclick="playEngine('lofi')">Lo-Fi</button>
-        <button class="mixer-btn" style="color:#ff4444;" onclick="stopEngine()">OFF</button>
+        <h1>WELLNESS WINDOW</h1>
+
+        <div id="mixer-panel">
+            <button class="mixer-btn" id="btn-rain" onclick="audioMaster('rain')">Rain</button>
+            <button class="mixer-btn" id="btn-waves" onclick="audioMaster('waves')">Waves</button>
+            <button class="mixer-btn" id="btn-forest" onclick="audioMaster('forest')">Forest</button>
+            <button class="mixer-btn" id="btn-lofi" onclick="audioMaster('lofi')">Lo-Fi</button>
+            <button class="mixer-btn" style="color:#ff4444;" onclick="stopAll()">OFF</button>
+        </div>
+
+        <div class="footer-sig">ARC-AZ // PERSPECTIVE</div>
     </div>
 
-    <div id="debug-log">SYSTEM READY // STANDBY</div>
-
-    <div class="grid">
-        <div class="window-card">READY FOR YOUTUBE</div>
-        <div class="window-card">READY FOR YOUTUBE</div>
-        <div class="window-card">READY FOR YOUTUBE</div>
-        <div class="window-card">READY FOR YOUTUBE</div>
-    </div>
-
-    <div class="footer-sig">ARC-AZ // PERSPECTIVE</div>
-
-    <audio id="master-player" loop crossorigin="anonymous"></audio>
+    <audio id="audio-rain" loop src="https://upload.wikimedia.org/wikipedia/commons/3/34/Rain_on_roof_1.ogg"></audio>
+    <audio id="audio-waves" loop src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Ocean_waves_crashing_on_the_beach.ogg"></audio>
+    <audio id="audio-forest" loop src="https://upload.wikimedia.org/wikipedia/commons/0/05/Bird_Ambience.ogg"></audio>
+    <audio id="audio-lofi" loop src="https://stream.zeno.fm/0r0xa792kwzuv"></audio>
 
     <script>
-        const player = document.getElementById('master-player');
-        const log = (msg) => document.getElementById('debug-log').innerText = "STATUS: " + msg.toUpperCase();
+        const sounds = ['rain', 'waves', 'forest', 'lofi'];
 
-        const library = {
-            rain: "https://upload.wikimedia.org/wikipedia/commons/3/34/Rain_on_roof_1.ogg",
-            waves: "https://upload.wikimedia.org/wikipedia/commons/b/b2/Ocean_waves_crashing_on_the_beach.ogg",
-            forest: "https://upload.wikimedia.org/wikipedia/commons/0/05/Bird_Ambience.ogg",
-            lofi: "https://stream.zeno.fm/0r0xa792kwzuv"
-        };
+        // 1. THE HANDSHAKE: This function runs when the user clicks 'Enter'
+        function initWindow() {
+            // Hide overlay and show content
+            document.getElementById('overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('overlay').style.display = 'none';
+                document.getElementById('content').style.opacity = '1';
+            }, 800);
 
-        let currentId = null;
+            // Silent Prime: The browser now allows this because of the 'Enter' click
+            sounds.forEach(id => {
+                const a = document.getElementById('audio-' + id);
+                a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(e => console.log("Priming..."));
+            });
+        }
 
-        async function playEngine(id) {
-            // If clicking the same button, stop it
-            if (currentId === id) {
-                stopEngine();
+        async function audioMaster(id) {
+            const target = document.getElementById('audio-' + id);
+            const btn = document.getElementById('btn-' + id);
+
+            if (!target.paused) {
+                target.pause();
+                btn.classList.remove('active');
                 return;
             }
 
-            // UI Reset
-            document.querySelectorAll('.mixer-btn').forEach(b => b.classList.remove('active'));
-            
-            log("loading " + id + "...");
-            
+            stopAll();
+
             try {
-                player.src = library[id];
-                player.load();
-                
-                // The Play Promise
-                await player.play();
-                
-                currentId = id;
-                document.getElementById('btn-' + id).classList.add('active');
-                log("streaming: " + id);
+                await target.play();
+                btn.classList.add('active');
             } catch (err) {
-                log("browser blocked autoplay. click page once.");
-                console.error(err);
+                console.error("Audio block:", err);
             }
         }
 
-        function stopEngine() {
-            player.pause();
-            player.src = "";
-            currentId = null;
-            document.querySelectorAll('.mixer-btn').forEach(b => b.classList.remove('active'));
-            log("system standby");
+        function stopAll() {
+            sounds.forEach(id => {
+                const a = document.getElementById('audio-' + id);
+                const b = document.getElementById('btn-' + id);
+                if (a) { a.pause(); a.currentTime = 0; }
+                if (b) b.classList.remove('active');
+            });
         }
 
         setInterval(() => {
