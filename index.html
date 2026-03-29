@@ -6,40 +6,10 @@
     <title>ARK-AZ // Perspective Window</title>
     <style>
         :root { --accent: #00aaff; --bg: #050505; --card-bg: #111; }
-        body { 
-            background: var(--bg); 
-            color: #e0e0e0; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; 
-            padding: 40px 20px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-        }
-
-        #status-bar { 
-            width: 100%; 
-            max-width: 1200px; 
-            display: flex; 
-            justify-content: space-between; 
-            font-family: monospace; 
-            font-size: 0.8rem; 
-            color: var(--accent); 
-            letter-spacing: 2px; 
-            margin-bottom: 20px; 
-            opacity: 0.8; 
-        }
-
-        h1 { 
-            font-size: 4rem; 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            letter-spacing: 15px; 
-            color: #fff; 
-            margin: 20px 0 40px 0; 
-            text-align: center; 
-            text-shadow: 0 0 20px rgba(0, 170, 255, 0.5); 
-        }
+        body { background: var(--bg); color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        #status-bar { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; font-family: monospace; font-size: 0.8rem; color: var(--accent); letter-spacing: 2px; margin-bottom: 20px; opacity: 0.8; }
+        h1 { font-size: 4rem; font-weight: 900; text-transform: uppercase; letter-spacing: 15px; color: #fff; margin: 20px 0 40px 0; text-align: center; text-shadow: 0 0 20px rgba(0, 170, 255, 0.5); }
         
         #mixer-panel { 
             background: rgba(255, 255, 255, 0.03); 
@@ -48,69 +18,26 @@
             border-radius: 50px; 
             display: flex; 
             gap: 30px; 
-            margin-bottom: 60px; 
+            margin-bottom: 30px; 
             backdrop-filter: blur(10px);
-            box-shadow: 0 0 30px rgba(0, 170, 255, 0.1);
         }
 
-        .mixer-btn { 
-            background: none; 
-            border: none; 
-            color: #666; 
-            cursor: pointer; 
-            font-size: 0.9rem; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            letter-spacing: 3px; 
-            transition: all 0.4s ease; 
-        }
+        .mixer-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 0.9rem; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; transition: 0.4s; }
+        .mixer-btn.active { color: var(--accent); text-shadow: 0 0 15px var(--accent); }
+        
+        #debug-log { font-family: monospace; font-size: 0.7rem; color: #555; margin-bottom: 30px; height: 1.2rem; }
 
-        .mixer-btn:hover { color: #fff; }
-        .mixer-btn.active { 
-            color: var(--accent); 
-            text-shadow: 0 0 15px var(--accent); 
-        }
-
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 25px; 
-            width: 100%; 
-            max-width: 1200px; 
-        }
-
-        .window-card { 
-            background: var(--card-bg); 
-            border: 1px solid #222; 
-            border-radius: 15px; 
-            overflow: hidden; 
-            text-decoration: none; 
-            transition: 0.3s; 
-        }
-
-        .window-card:hover { border-color: var(--accent); transform: translateY(-5px); }
-
-        .thumb { height: 150px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; color: #333; font-weight: bold; }
-
-        .card-content { padding: 15px; text-align: center; }
-        .card-content h2 { margin: 0; font-size: 1rem; color: #fff; }
-
-        .footer-sig { 
-            margin-top: 80px; 
-            font-family: monospace; 
-            color: var(--accent); 
-            letter-spacing: 8px; 
-            opacity: 0.4; 
-            font-size: 0.7rem;
-        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; width: 100%; max-width: 1200px; }
+        .window-card { background: var(--card-bg); border: 1px solid #222; border-radius: 15px; height: 200px; display: flex; align-items: center; justify-content: center; }
+        .footer-sig { margin-top: 80px; font-family: monospace; color: var(--accent); letter-spacing: 8px; opacity: 0.4; font-size: 0.7rem; }
     </style>
 </head>
-<body>
+<body onclick="primeSystem()">
 
     <div id="status-bar">
         <span>SYSTEM: ONLINE</span>
         <span id="clock">00:00:00</span>
-        <span>ARK-AZ // BUILD 2.0</span>
+        <span>ARK-AZ // BUILD 2.1</span>
     </div>
 
     <h1>WELLNESS WINDOW</h1>
@@ -120,47 +47,62 @@
         <button class="mixer-btn" id="btn-waves" onclick="audioMaster('waves')">Waves</button>
         <button class="mixer-btn" id="btn-forest" onclick="audioMaster('forest')">Forest</button>
         <button class="mixer-btn" id="btn-lofi" onclick="audioMaster('lofi')">Lo-Fi</button>
-        <button class="mixer-btn" style="color:#ff4444; margin-left: 10px;" onclick="stopAll()">OFF</button>
+        <button class="mixer-btn" style="color:#ff4444;" onclick="stopAll()">OFF</button>
     </div>
 
+    <div id="debug-log">STATUS: WAITING FOR INTERACTION...</div>
+
     <div class="grid">
-        <a href="#" class="window-card"><div class="thumb">LIVE FEED</div><div class="card-content"><h2>Placeholder</h2></div></a>
-        <a href="#" class="window-card"><div class="thumb">LIVE FEED</div><div class="card-content"><h2>Placeholder</h2></div></a>
-        <a href="#" class="window-card"><div class="thumb">LIVE FEED</div><div class="card-content"><h2>Placeholder</h2></div></a>
-        <a href="#" class="window-card"><div class="thumb">LIVE FEED</div><div class="card-content"><h2>Placeholder</h2></div></a>
+        <div class="window-card">VIDEO FEED PLACEHOLDER</div>
+        <div class="window-card">VIDEO FEED PLACEHOLDER</div>
+        <div class="window-card">VIDEO FEED PLACEHOLDER</div>
+        <div class="window-card">VIDEO FEED PLACEHOLDER</div>
     </div>
 
     <div class="footer-sig">ARC-AZ // PERSPECTIVE</div>
 
-    <audio id="audio-rain" loop src="https://cdn.pixabay.com/audio/2022/07/04/audio_32064d1f71.mp3"></audio>
-    <audio id="audio-waves" loop src="https://cdn.pixabay.com/audio/2021/08/09/audio_6590f0ca13.mp3"></audio>
-    <audio id="audio-forest" loop src="https://cdn.pixabay.com/audio/2022/02/13/audio_82af9d8a39.mp3"></audio>
+    <audio id="audio-rain" loop src="https://upload.wikimedia.org/wikipedia/commons/3/34/Rain_on_roof_1.ogg"></audio>
+    <audio id="audio-waves" loop src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Ocean_waves_crashing_on_the_beach.ogg"></audio>
+    <audio id="audio-forest" loop src="https://upload.wikimedia.org/wikipedia/commons/0/05/Bird_Ambience.ogg"></audio>
     <audio id="audio-lofi" loop src="https://stream.zeno.fm/0r0xa792kwzuv"></audio>
 
     <script>
         const sounds = ['rain', 'waves', 'forest', 'lofi'];
+        let isPrimed = false;
+
+        function log(msg) { document.getElementById('debug-log').innerText = "STATUS: " + msg.toUpperCase(); }
+
+        // Primes all audio objects so the browser "unlocks" them
+        function primeSystem() {
+            if (isPrimed) return;
+            sounds.forEach(id => {
+                const a = document.getElementById('audio-' + id);
+                a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(() => {});
+            });
+            isPrimed = true;
+            log("Audio System Unlocked");
+        }
 
         async function audioMaster(id) {
             const target = document.getElementById('audio-' + id);
             const btn = document.getElementById('btn-' + id);
 
-            // Toggle off if already playing
             if (!target.paused) {
                 target.pause();
                 btn.classList.remove('active');
+                log(id + " paused");
                 return;
             }
 
-            // Stop all others first (Radio Logic)
             stopAll();
 
             try {
-                // Play selected sound
+                target.load(); // Refresh connection
                 await target.play();
                 btn.classList.add('active');
+                log("Playing: " + id);
             } catch (err) {
-                console.log("Waiting for user interaction to enable audio.");
-                alert("Please click anywhere on the page first to enable audio!");
+                log("Error: Click page first");
             }
         }
 
@@ -168,18 +110,13 @@
             sounds.forEach(id => {
                 const a = document.getElementById('audio-' + id);
                 const b = document.getElementById('btn-' + id);
-                if (a) {
-                    a.pause();
-                    a.currentTime = 0; // Reset for MP3 files
-                }
+                if (a) { a.pause(); a.currentTime = 0; }
                 if (b) b.classList.remove('active');
             });
         }
 
-        // Clock Logic
         setInterval(() => {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString();
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
         }, 1000);
     </script>
 </body>
