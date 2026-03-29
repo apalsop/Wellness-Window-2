@@ -25,94 +25,91 @@
         .mixer-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 0.9rem; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; transition: 0.4s; }
         .mixer-btn.active { color: var(--accent); text-shadow: 0 0 15px var(--accent); }
         
-        #debug-log { font-family: monospace; font-size: 0.7rem; color: #555; margin-bottom: 30px; height: 1.2rem; }
+        #debug-log { font-family: monospace; font-size: 0.75rem; color: var(--accent); margin-bottom: 30px; border-bottom: 1px solid #222; padding-bottom: 5px; min-width: 300px; text-align: center; }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; width: 100%; max-width: 1200px; }
-        .window-card { background: var(--card-bg); border: 1px solid #222; border-radius: 15px; height: 200px; display: flex; align-items: center; justify-content: center; }
+        .window-card { background: var(--card-bg); border: 1px solid #222; border-radius: 15px; height: 180px; display: flex; align-items: center; justify-content: center; opacity: 0.5; }
         .footer-sig { margin-top: 80px; font-family: monospace; color: var(--accent); letter-spacing: 8px; opacity: 0.4; font-size: 0.7rem; }
     </style>
 </head>
-<body onclick="primeSystem()">
+<body>
 
     <div id="status-bar">
         <span>SYSTEM: ONLINE</span>
         <span id="clock">00:00:00</span>
-        <span>ARK-AZ // BUILD 2.1</span>
+        <span>ARK-AZ // BUILD 2.2</span>
     </div>
 
     <h1>WELLNESS WINDOW</h1>
 
     <div id="mixer-panel">
-        <button class="mixer-btn" id="btn-rain" onclick="audioMaster('rain')">Rain</button>
-        <button class="mixer-btn" id="btn-waves" onclick="audioMaster('waves')">Waves</button>
-        <button class="mixer-btn" id="btn-forest" onclick="audioMaster('forest')">Forest</button>
-        <button class="mixer-btn" id="btn-lofi" onclick="audioMaster('lofi')">Lo-Fi</button>
-        <button class="mixer-btn" style="color:#ff4444;" onclick="stopAll()">OFF</button>
+        <button class="mixer-btn" id="btn-rain" onclick="playEngine('rain')">Rain</button>
+        <button class="mixer-btn" id="btn-waves" onclick="playEngine('waves')">Waves</button>
+        <button class="mixer-btn" id="btn-forest" onclick="playEngine('forest')">Forest</button>
+        <button class="mixer-btn" id="btn-lofi" onclick="playEngine('lofi')">Lo-Fi</button>
+        <button class="mixer-btn" style="color:#ff4444;" onclick="stopEngine()">OFF</button>
     </div>
 
-    <div id="debug-log">STATUS: WAITING FOR INTERACTION...</div>
+    <div id="debug-log">SYSTEM READY // STANDBY</div>
 
     <div class="grid">
-        <div class="window-card">VIDEO FEED PLACEHOLDER</div>
-        <div class="window-card">VIDEO FEED PLACEHOLDER</div>
-        <div class="window-card">VIDEO FEED PLACEHOLDER</div>
-        <div class="window-card">VIDEO FEED PLACEHOLDER</div>
+        <div class="window-card">READY FOR YOUTUBE</div>
+        <div class="window-card">READY FOR YOUTUBE</div>
+        <div class="window-card">READY FOR YOUTUBE</div>
+        <div class="window-card">READY FOR YOUTUBE</div>
     </div>
 
     <div class="footer-sig">ARC-AZ // PERSPECTIVE</div>
 
-    <audio id="audio-rain" loop src="https://upload.wikimedia.org/wikipedia/commons/3/34/Rain_on_roof_1.ogg"></audio>
-    <audio id="audio-waves" loop src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Ocean_waves_crashing_on_the_beach.ogg"></audio>
-    <audio id="audio-forest" loop src="https://upload.wikimedia.org/wikipedia/commons/0/05/Bird_Ambience.ogg"></audio>
-    <audio id="audio-lofi" loop src="https://stream.zeno.fm/0r0xa792kwzuv"></audio>
+    <audio id="master-player" loop crossorigin="anonymous"></audio>
 
     <script>
-        const sounds = ['rain', 'waves', 'forest', 'lofi'];
-        let isPrimed = false;
+        const player = document.getElementById('master-player');
+        const log = (msg) => document.getElementById('debug-log').innerText = "STATUS: " + msg.toUpperCase();
 
-        function log(msg) { document.getElementById('debug-log').innerText = "STATUS: " + msg.toUpperCase(); }
+        const library = {
+            rain: "https://upload.wikimedia.org/wikipedia/commons/3/34/Rain_on_roof_1.ogg",
+            waves: "https://upload.wikimedia.org/wikipedia/commons/b/b2/Ocean_waves_crashing_on_the_beach.ogg",
+            forest: "https://upload.wikimedia.org/wikipedia/commons/0/05/Bird_Ambience.ogg",
+            lofi: "https://stream.zeno.fm/0r0xa792kwzuv"
+        };
 
-        // Primes all audio objects so the browser "unlocks" them
-        function primeSystem() {
-            if (isPrimed) return;
-            sounds.forEach(id => {
-                const a = document.getElementById('audio-' + id);
-                a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(() => {});
-            });
-            isPrimed = true;
-            log("Audio System Unlocked");
-        }
+        let currentId = null;
 
-        async function audioMaster(id) {
-            const target = document.getElementById('audio-' + id);
-            const btn = document.getElementById('btn-' + id);
-
-            if (!target.paused) {
-                target.pause();
-                btn.classList.remove('active');
-                log(id + " paused");
+        async function playEngine(id) {
+            // If clicking the same button, stop it
+            if (currentId === id) {
+                stopEngine();
                 return;
             }
 
-            stopAll();
-
+            // UI Reset
+            document.querySelectorAll('.mixer-btn').forEach(b => b.classList.remove('active'));
+            
+            log("loading " + id + "...");
+            
             try {
-                target.load(); // Refresh connection
-                await target.play();
-                btn.classList.add('active');
-                log("Playing: " + id);
+                player.src = library[id];
+                player.load();
+                
+                // The Play Promise
+                await player.play();
+                
+                currentId = id;
+                document.getElementById('btn-' + id).classList.add('active');
+                log("streaming: " + id);
             } catch (err) {
-                log("Error: Click page first");
+                log("browser blocked autoplay. click page once.");
+                console.error(err);
             }
         }
 
-        function stopAll() {
-            sounds.forEach(id => {
-                const a = document.getElementById('audio-' + id);
-                const b = document.getElementById('btn-' + id);
-                if (a) { a.pause(); a.currentTime = 0; }
-                if (b) b.classList.remove('active');
-            });
+        function stopEngine() {
+            player.pause();
+            player.src = "";
+            currentId = null;
+            document.querySelectorAll('.mixer-btn').forEach(b => b.classList.remove('active'));
+            log("system standby");
         }
 
         setInterval(() => {
