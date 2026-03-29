@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARK - AZ</title>
+    <title>Wellness Window</title>
     <style>
         :root { --accent: #00aaff; --bg: #050505; --card-bg: #111; }
         body { background: var(--bg); color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        /* THE START SCREEN */
+        /* SPLASH SCREEN */
         #splash {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 9999;
@@ -25,7 +25,7 @@
         #main-ui { display: none; padding: 40px 20px; width: 100%; flex-direction: column; align-items: center; }
         #status-bar { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; font-family: monospace; font-size: 0.8rem; color: var(--accent); letter-spacing: 2px; margin-bottom: 20px; opacity: 0.7; }
         
-        h1 { font-size: 5rem; font-weight: 900; text-transform: uppercase; letter-spacing: 20px; color: #fff; margin: 20px 0 40px 0; text-align: center; text-shadow: 0 0 20px rgba(0, 170, 255, 0.4); }
+        h1 { font-size: 4.5rem; font-weight: 900; text-transform: uppercase; letter-spacing: 15px; color: #fff; margin: 20px 0 40px 0; text-align: center; text-shadow: 0 0 20px rgba(0, 170, 255, 0.4); }
         
         #mixer { 
             background: rgba(255, 255, 255, 0.03); border: 1px solid var(--accent); 
@@ -37,89 +37,81 @@
         .btn:hover { color: #fff; }
         .btn.active { color: var(--accent); text-shadow: 0 0 15px var(--accent); }
 
-        .sig { margin-top: 100px; font-family: monospace; color: var(--accent); letter-spacing: 10px; opacity: 0.5; font-size: 0.8rem; font-weight: bold; }
+        .tagline { margin-top: auto; padding-bottom: 50px; font-family: monospace; color: var(--accent); letter-spacing: 10px; opacity: 0.6; font-size: 0.9rem; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="splash">
-        <h1 style="font-size: 2.5rem; margin-bottom: 50px;">ARK - AZ</h1>
-        <button id="enter-btn" onclick="unlockSystem()">Enter</button>
+        <h1 style="font-size: 2.5rem; margin-bottom: 50px;">WELLNESS WINDOW</h1>
+        <button id="enter-btn" onclick="startApp()">Enter</button>
     </div>
 
     <div id="main-ui">
         <div id="status-bar">
             <span>SYSTEM: ONLINE</span>
             <span id="clock">00:00:00</span>
-            <span>BUILD: STABLE</span>
+            <span>STABLE_STREAM_V3.1</span>
         </div>
 
-        <h1>ARK - AZ</h1>
+        <h1>WELLNESS WINDOW</h1>
 
         <div id="mixer">
-            <button class="btn" id="btn-rain" onclick="toggle('rain')">Rain</button>
-            <button class="btn" id="btn-waves" onclick="toggle('waves')">Waves</button>
-            <button class="btn" id="btn-forest" onclick="toggle('forest')">Forest</button>
-            <button class="btn" id="btn-lofi" onclick="toggle('lofi')">Lo-Fi</button>
-            <button class="btn" style="color:#ff4444; margin-left: 15px;" onclick="killAll()">OFF</button>
+            <button class="btn" id="btn-rain" onclick="playAudio('rain')">Rain</button>
+            <button class="btn" id="btn-waves" onclick="playAudio('waves')">Waves</button>
+            <button class="btn" id="btn-forest" onclick="playAudio('forest')">Forest</button>
+            <button class="btn" id="btn-lofi" onclick="playAudio('lofi')">Lo-Fi</button>
+            <button class="btn" style="color:#ff4444; margin-left: 15px;" onclick="stopAll()">OFF</button>
         </div>
 
-        <div class="sig">ARC - AZ</div>
+        <div class="tagline">ARK - AZ</div>
     </div>
 
-    <audio id="aud-rain" loop preload="auto" src="https://cdn.pixabay.com/audio/2022/07/04/audio_32064d1f71.mp3"></audio>
-    <audio id="aud-waves" loop preload="auto" src="https://cdn.pixabay.com/audio/2021/08/09/audio_6590f0ca13.mp3"></audio>
-    <audio id="aud-forest" loop preload="auto" src="https://cdn.pixabay.com/audio/2022/02/13/audio_82af9d8a39.mp3"></audio>
-    <audio id="aud-lofi" loop preload="auto" src="https://stream.zeno.fm/0r0xa792kwzuv"></audio>
+    <audio id="aud-rain" loop src="https://stream.zeno.fm/032u683f83duv"></audio>
+    <audio id="aud-waves" loop src="https://stream.zeno.fm/4v6v798n0zhvv"></audio>
+    <audio id="aud-forest" loop src="https://stream.zeno.fm/65k793ykwzuv"></audio>
+    <audio id="aud-lofi" loop src="https://stream.zeno.fm/0r0xa792kwzuv"></audio>
 
     <script>
-        const ids = ['rain', 'waves', 'forest', 'lofi'];
+        const sources = ['rain', 'waves', 'forest', 'lofi'];
 
-        // This function forces the browser to allow all 4 audio tracks at once
-        function unlockSystem() {
+        function startApp() {
             document.getElementById('splash').style.display = 'none';
             document.getElementById('main-ui').style.display = 'flex';
             
-            ids.forEach(name => {
-                const a = document.getElementById('aud-' + name);
-                // We play and immediately pause every track while it's muted. 
-                // This "primes" the browser to allow them later.
-                a.muted = true;
-                a.play().then(() => {
-                    a.pause();
-                    a.muted = false;
-                    a.currentTime = 0;
-                }).catch(e => console.log("Priming " + name));
+            // Force browser to "trust" all 4 streams immediately on Enter
+            sources.forEach(id => {
+                const a = document.getElementById('aud-' + id);
+                a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(e => {});
             });
         }
 
-        function toggle(name) {
-            const target = document.getElementById('aud-' + name);
-            const btn = document.getElementById('btn-' + name);
+        async function playAudio(id) {
+            const target = document.getElementById('aud-' + id);
+            const btn = document.getElementById('btn-' + id);
 
-            // If it's already playing, just turn it off
             if (!target.paused) {
                 target.pause();
                 btn.classList.remove('active');
                 return;
             }
 
-            // Otherwise, turn everything else off first
-            killAll();
+            stopAll();
 
-            // Now play the selected one and turn the button blue
-            target.play();
-            btn.classList.add('active');
+            try {
+                await target.play();
+                btn.classList.add('active');
+            } catch (err) {
+                console.error("Stream Blocked", err);
+            }
         }
 
-        function killAll() {
-            ids.forEach(name => {
-                const a = document.getElementById('aud-' + name);
-                const b = document.getElementById('btn-' + name);
-                a.pause();
-                // We only reset the time for MP3s (Rain/Waves/Forest), not the Lo-Fi stream
-                if (name !== 'lofi') a.currentTime = 0;
-                b.classList.remove('active');
+        function stopAll() {
+            sources.forEach(id => {
+                const a = document.getElementById('aud-' + id);
+                const b = document.getElementById('btn-' + id);
+                if (a) a.pause();
+                if (b) b.classList.remove('active');
             });
         }
 
