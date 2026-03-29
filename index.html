@@ -3,119 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARK-AZ // Perspective Window</title>
+    <title>ARK - AZ</title>
     <style>
         :root { --accent: #00aaff; --bg: #050505; --card-bg: #111; }
         body { background: var(--bg); color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        /* THE SPLASH SCREEN - This solves the "Circles" */
-        #overlay {
+        /* THE START SCREEN */
+        #splash {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: 0.8s ease-out;
         }
-        #start-btn {
-            padding: 20px 50px; background: none; border: 2px solid var(--accent);
-            color: var(--accent); font-size: 1.5rem; letter-spacing: 5px;
+        #enter-btn {
+            padding: 20px 60px; background: none; border: 2px solid var(--accent);
+            color: var(--accent); font-size: 1.8rem; letter-spacing: 10px;
             cursor: pointer; text-transform: uppercase; transition: 0.3s;
-            box-shadow: 0 0 20px rgba(0, 170, 255, 0.2);
         }
-        #start-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 40px var(--accent); }
+        #enter-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 30px var(--accent); }
 
-        /* Main UI */
-        #content { opacity: 0; transition: 1.5s; padding: 40px 20px; width: 100%; display: flex; flex-direction: column; align-items: center; }
-        #status-bar { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; font-family: monospace; font-size: 0.8rem; color: var(--accent); letter-spacing: 2px; margin-bottom: 20px; }
-        h1 { font-size: 4rem; font-weight: 900; text-transform: uppercase; letter-spacing: 15px; color: #fff; margin: 20px 0 40px 0; text-align: center; }
+        /* MAIN UI */
+        #main-ui { display: none; padding: 40px 20px; width: 100%; flex-direction: column; align-items: center; }
+        #status-bar { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; font-family: monospace; font-size: 0.8rem; color: var(--accent); letter-spacing: 2px; margin-bottom: 20px; opacity: 0.7; }
         
-        #mixer-panel { 
+        h1 { font-size: 5rem; font-weight: 900; text-transform: uppercase; letter-spacing: 20px; color: #fff; margin: 20px 0 40px 0; text-align: center; text-shadow: 0 0 20px rgba(0, 170, 255, 0.4); }
+        
+        #mixer { 
             background: rgba(255, 255, 255, 0.03); border: 1px solid var(--accent); 
-            padding: 15px 40px; border-radius: 50px; display: flex; gap: 30px; 
-            margin-bottom: 30px; backdrop-filter: blur(10px);
+            padding: 15px 40px; border-radius: 50px; display: flex; gap: 35px; 
+            margin-bottom: 50px; backdrop-filter: blur(10px);
         }
-        .mixer-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 0.9rem; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; transition: 0.4s; }
-        .mixer-btn.active { color: var(--accent); text-shadow: 0 0 15px var(--accent); }
-        .footer-sig { margin-top: 80px; font-family: monospace; color: var(--accent); letter-spacing: 8px; opacity: 0.4; font-size: 0.7rem; }
+
+        .btn { background: none; border: none; color: #555; cursor: pointer; font-size: 1rem; font-weight: bold; text-transform: uppercase; letter-spacing: 4px; transition: 0.3s; }
+        .btn:hover { color: #fff; }
+        .btn.active { color: var(--accent); text-shadow: 0 0 15px var(--accent); }
+
+        .sig { margin-top: 100px; font-family: monospace; color: var(--accent); letter-spacing: 10px; opacity: 0.5; font-size: 0.8rem; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="overlay">
-        <h1 style="font-size: 2rem; margin-bottom: 40px;">ARK-AZ // PERSPECTIVE</h1>
-        <button id="start-btn" onclick="initWindow()">Enter Window</button>
-        <p style="margin-top: 20px; color: #444; font-family: monospace;">CLICKS REQUIRED TO UNLOCK MEDIA SESSIONS</p>
+    <div id="splash">
+        <h1 style="font-size: 2.5rem; margin-bottom: 50px;">ARK - AZ</h1>
+        <button id="enter-btn" onclick="unlockSystem()">Enter</button>
     </div>
 
-    <div id="content">
+    <div id="main-ui">
         <div id="status-bar">
             <span>SYSTEM: ONLINE</span>
             <span id="clock">00:00:00</span>
-            <span>BUILD 3.0 // STABLE</span>
+            <span>BUILD: STABLE</span>
         </div>
 
-        <h1>WELLNESS WINDOW</h1>
+        <h1>ARK - AZ</h1>
 
-        <div id="mixer-panel">
-            <button class="mixer-btn" id="btn-rain" onclick="audioMaster('rain')">Rain</button>
-            <button class="mixer-btn" id="btn-waves" onclick="audioMaster('waves')">Waves</button>
-            <button class="mixer-btn" id="btn-forest" onclick="audioMaster('forest')">Forest</button>
-            <button class="mixer-btn" id="btn-lofi" onclick="audioMaster('lofi')">Lo-Fi</button>
-            <button class="mixer-btn" style="color:#ff4444;" onclick="stopAll()">OFF</button>
+        <div id="mixer">
+            <button class="btn" id="btn-rain" onclick="toggle('rain')">Rain</button>
+            <button class="btn" id="btn-waves" onclick="toggle('waves')">Waves</button>
+            <button class="btn" id="btn-forest" onclick="toggle('forest')">Forest</button>
+            <button class="btn" id="btn-lofi" onclick="toggle('lofi')">Lo-Fi</button>
+            <button class="btn" style="color:#ff4444; margin-left: 15px;" onclick="killAll()">OFF</button>
         </div>
 
-        <div class="footer-sig">ARC-AZ // PERSPECTIVE</div>
+        <div class="sig">ARC - AZ</div>
     </div>
 
-    <audio id="audio-rain" loop src="https://upload.wikimedia.org/wikipedia/commons/3/34/Rain_on_roof_1.ogg"></audio>
-    <audio id="audio-waves" loop src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Ocean_waves_crashing_on_the_beach.ogg"></audio>
-    <audio id="audio-forest" loop src="https://upload.wikimedia.org/wikipedia/commons/0/05/Bird_Ambience.ogg"></audio>
-    <audio id="audio-lofi" loop src="https://stream.zeno.fm/0r0xa792kwzuv"></audio>
+    <audio id="aud-rain" loop preload="auto" src="https://cdn.pixabay.com/audio/2022/07/04/audio_32064d1f71.mp3"></audio>
+    <audio id="aud-waves" loop preload="auto" src="https://cdn.pixabay.com/audio/2021/08/09/audio_6590f0ca13.mp3"></audio>
+    <audio id="aud-forest" loop preload="auto" src="https://cdn.pixabay.com/audio/2022/02/13/audio_82af9d8a39.mp3"></audio>
+    <audio id="aud-lofi" loop preload="auto" src="https://stream.zeno.fm/0r0xa792kwzuv"></audio>
 
     <script>
-        const sounds = ['rain', 'waves', 'forest', 'lofi'];
+        const ids = ['rain', 'waves', 'forest', 'lofi'];
 
-        // 1. THE HANDSHAKE: This function runs when the user clicks 'Enter'
-        function initWindow() {
-            // Hide overlay and show content
-            document.getElementById('overlay').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('overlay').style.display = 'none';
-                document.getElementById('content').style.opacity = '1';
-            }, 800);
-
-            // Silent Prime: The browser now allows this because of the 'Enter' click
-            sounds.forEach(id => {
-                const a = document.getElementById('audio-' + id);
-                a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(e => console.log("Priming..."));
+        // This function forces the browser to allow all 4 audio tracks at once
+        function unlockSystem() {
+            document.getElementById('splash').style.display = 'none';
+            document.getElementById('main-ui').style.display = 'flex';
+            
+            ids.forEach(name => {
+                const a = document.getElementById('aud-' + name);
+                // We play and immediately pause every track while it's muted. 
+                // This "primes" the browser to allow them later.
+                a.muted = true;
+                a.play().then(() => {
+                    a.pause();
+                    a.muted = false;
+                    a.currentTime = 0;
+                }).catch(e => console.log("Priming " + name));
             });
         }
 
-        async function audioMaster(id) {
-            const target = document.getElementById('audio-' + id);
-            const btn = document.getElementById('btn-' + id);
+        function toggle(name) {
+            const target = document.getElementById('aud-' + name);
+            const btn = document.getElementById('btn-' + name);
 
+            // If it's already playing, just turn it off
             if (!target.paused) {
                 target.pause();
                 btn.classList.remove('active');
                 return;
             }
 
-            stopAll();
+            // Otherwise, turn everything else off first
+            killAll();
 
-            try {
-                await target.play();
-                btn.classList.add('active');
-            } catch (err) {
-                console.error("Audio block:", err);
-            }
+            // Now play the selected one and turn the button blue
+            target.play();
+            btn.classList.add('active');
         }
 
-        function stopAll() {
-            sounds.forEach(id => {
-                const a = document.getElementById('audio-' + id);
-                const b = document.getElementById('btn-' + id);
-                if (a) { a.pause(); a.currentTime = 0; }
-                if (b) b.classList.remove('active');
+        function killAll() {
+            ids.forEach(name => {
+                const a = document.getElementById('aud-' + name);
+                const b = document.getElementById('btn-' + name);
+                a.pause();
+                // We only reset the time for MP3s (Rain/Waves/Forest), not the Lo-Fi stream
+                if (name !== 'lofi') a.currentTime = 0;
+                b.classList.remove('active');
             });
         }
 
