@@ -5,112 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wellness Window</title>
     <style>
-        :root { --accent: #00aaff; --bg: #050505; }
-        body { background: var(--bg); color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        :root { --accent: #00aaff; --bg: #050505; --card-bg: #111; }
+        body { background: var(--bg); color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        /* THE ENTER OVERLAY */
-        #splash {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        #enter-btn {
-            padding: 20px 60px; background: none; border: 2px solid var(--accent);
-            color: var(--accent); font-size: 1.8rem; letter-spacing: 10px;
-            cursor: pointer; text-transform: uppercase; transition: 0.3s;
-        }
-        #enter-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 30px var(--accent); }
-
-        /* MAIN APP LAYER */
-        #main-ui { display: none; padding: 40px 20px; width: 100%; flex-direction: column; align-items: center; }
         #status-bar { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; font-family: monospace; font-size: 0.8rem; color: var(--accent); letter-spacing: 2px; margin-bottom: 20px; opacity: 0.7; }
-        
-        h1 { font-size: 4.5rem; font-weight: 900; text-transform: uppercase; letter-spacing: 15px; color: #fff; margin: 20px 0 40px 0; text-align: center; text-shadow: 0 0 20px rgba(0, 170, 255, 0.4); }
+        h1 { font-size: 4rem; font-weight: 900; text-transform: uppercase; letter-spacing: 15px; color: #fff; margin: 20px 0 40px 0; text-align: center; text-shadow: 0 0 20px rgba(0, 170, 255, 0.4); }
         
         #mixer { 
             background: rgba(255, 255, 255, 0.03); border: 1px solid var(--accent); 
-            padding: 15px 40px; border-radius: 50px; display: flex; gap: 35px; 
+            padding: 15px 40px; border-radius: 50px; display: flex; gap: 30px; 
             margin-bottom: 50px; backdrop-filter: blur(10px);
         }
-
         .btn { background: none; border: none; color: #555; cursor: pointer; font-size: 1rem; font-weight: bold; text-transform: uppercase; letter-spacing: 4px; transition: 0.3s; }
-        .btn:hover { color: #fff; }
         .btn.active { color: var(--accent); text-shadow: 0 0 15px var(--accent); }
 
-        .tagline { margin-top: auto; padding-bottom: 50px; font-family: monospace; color: var(--accent); letter-spacing: 10px; opacity: 0.6; font-size: 0.9rem; font-weight: bold; }
+        /* 16-TILE GRID PLACEHOLDER */
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%; max-width: 1200px; }
+        .tile { background: var(--card-bg); border: 1px solid #222; aspect-ratio: 16/9; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #444; }
+
+        .tagline { margin-top: 100px; font-family: monospace; color: var(--accent); letter-spacing: 10px; opacity: 0.6; font-size: 0.9rem; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="splash">
-        <h1 style="font-size: 2.5rem; margin-bottom: 50px;">WELLNESS WINDOW</h1>
-        <button id="enter-btn" onclick="openWindow()">Enter</button>
+    <div id="status-bar">
+        <span>SYSTEM: ONLINE</span>
+        <span id="clock">00:00:00</span>
+        <span>BUILD_2.0_REBOOT</span>
     </div>
 
-    <div id="main-ui">
-        <div id="status-bar">
-            <span>SYSTEM: ONLINE</span>
-            <span id="clock">00:00:00</span>
-            <span>BUILD_3.3_UNIFIED</span>
-        </div>
+    <h1>WELLNESS WINDOW</h1>
 
-        <h1>WELLNESS WINDOW</h1>
-
-        <div id="mixer">
-            <button class="btn" id="btn-rain" onclick="playStream('rain', 'https://stream.zeno.fm/032u683f83duv')">Rain</button>
-            <button class="btn" id="btn-waves" onclick="playStream('waves', 'https://stream.zeno.fm/4v6v798n0zhvv')">Waves</button>
-            <button class="btn" id="btn-forest" onclick="playStream('forest', 'https://stream.zeno.fm/65k793ykwzuv')">Forest</button>
-            <button class="btn" id="btn-lofi" onclick="playStream('lofi', 'https://stream.zeno.fm/0r0xa792kwzuv')">Lo-Fi</button>
-            <button class="btn" style="color:#ff4444;" onclick="killAudio()">OFF</button>
-        </div>
-
-        <div class="tagline">ARK - AZ</div>
+    <div id="mixer">
+        <button class="btn" id="btn-rain" onclick="toggle('rain')">Rain</button>
+        <button class="btn" id="btn-waves" onclick="toggle('waves')">Waves</button>
+        <button class="btn" id="btn-forest" onclick="toggle('forest')">Forest</button>
+        <button class="btn" id="btn-lofi" onclick="toggle('lofi')">Lo-Fi</button>
+        <button class="btn" style="color:#ff4444;" onclick="allOff()">OFF</button>
     </div>
 
-    <audio id="master-player" crossorigin="anonymous"></audio>
+    <div class="grid" id="video-grid">
+        </div>
+
+    <div class="tagline">ARK - AZ</div>
+
+    <audio id="aud-rain" loop src="https://actions.google.com/sounds/v1/water/rain_on_roof.ogg"></audio>
+    <audio id="aud-waves" loop src="https://actions.google.com/sounds/v1/water/waves_crashing_on_shore.ogg"></audio>
+    <audio id="aud-forest" loop src="https://actions.google.com/sounds/v1/ambiences/forest_ambience.ogg"></audio>
+    <audio id="aud-lofi" loop src="https://stream.zeno.fm/0r0xa792kwzuv"></audio>
 
     <script>
-        const player = document.getElementById('master-player');
-        let currentActiveId = null;
+        const ids = ['rain', 'waves', 'forest', 'lofi'];
 
-        function openWindow() {
-            document.getElementById('splash').style.display = 'none';
-            document.getElementById('main-ui').style.display = 'flex';
-        }
+        function toggle(name) {
+            const target = document.getElementById('aud-' + name);
+            const btn = document.getElementById('btn-' + name);
 
-        function playStream(id, url) {
-            // If clicking the one that is already playing, turn it off
-            if (currentActiveId === id) {
-                killAudio();
+            if (!target.paused) {
+                target.pause();
+                btn.classList.remove('active');
                 return;
             }
 
-            // Clear old UI
-            killAudio();
-
-            // Set new stream and play
-            player.src = url;
-            player.play();
+            allOff();
             
-            // Update UI
-            currentActiveId = id;
-            document.getElementById('btn-' + id).classList.add('active');
-            
-            // Sync with browser media center
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: 'Wellness Window',
-                    artist: id.toUpperCase(),
-                    album: 'ARK - AZ'
-                });
-            }
+            // Try/Catch ensures the button still turns blue even if browser throws a warning
+            target.play().then(() => {
+                btn.classList.add('active');
+            }).catch(e => {
+                btn.classList.add('active'); // Turn blue anyway
+                alert("Click anywhere on the page first to enable audio!");
+            });
         }
 
-        function killAudio() {
-            player.pause();
-            player.src = "";
-            document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
-            currentActiveId = null;
+        function allOff() {
+            ids.forEach(id => {
+                const a = document.getElementById('aud-' + id);
+                const b = document.getElementById('btn-' + id);
+                a.pause();
+                b.classList.remove('active');
+            });
+        }
+
+        // Initialize 16 tiles
+        const grid = document.getElementById('video-grid');
+        for(let i=1; i<=16; i++) {
+            const tile = document.createElement('div');
+            tile.className = 'tile';
+            tile.innerText = 'YOUTUBE_SLOT_' + i;
+            grid.appendChild(tile);
         }
 
         setInterval(() => {
